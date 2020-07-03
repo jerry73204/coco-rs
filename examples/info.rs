@@ -17,6 +17,6 @@ struct Args {
 fn main() -> Result<()> {
     let Args { dataset_dir, name } = argh::from_env();
     let dataset = DataSet::load(&dataset_dir, &name)?;
-    println!("{} images found", dataset.image_paths.len());
+    println!("{} images found", dataset.instances.images.len());
     Ok(())
 }

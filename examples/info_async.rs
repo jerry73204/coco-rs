@@ -21,7 +21,7 @@ mod example {
     pub async fn main() -> Result<()> {
         let Args { dataset_dir, name } = argh::from_env();
         let dataset = DataSet::load_async(&dataset_dir, &name).await?;
-        println!("{} images found", dataset.image_paths.len());
+        println!("{} images found", dataset.instances.images.len());
         Ok(())
     }
 }

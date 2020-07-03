@@ -3,7 +3,8 @@ use crate::common::*;
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct DataSet {
     pub instances: Instances,
-    pub image_paths: Vec<PathBuf>,
+    pub image_dir: PathBuf,
+    pub instances_file: PathBuf,
 }
 
 impl DataSet {
@@ -14,22 +15,17 @@ impl DataSet {
         use std::{fs::File, io::BufReader};
 
         let dir = dir.as_ref();
+        let image_dir = dir.join(name);
+        let annotation_dir = dir.join("annotations");
 
-        let instances_file = dir
-            .join("annotations")
-            .join(format!("instances_{}.json", name));
+        let instances_file = annotation_dir.join(format!("instances_{}.json", name));
         let instances: Instances =
             serde_json::from_reader(BufReader::new(File::open(&instances_file)?))?;
 
-        let image_paths = instances
-            .images
-            .iter()
-            .map(|image| dir.join(name).join(&image.file_name))
-            .collect::<Vec<_>>();
-
         let dataset = Self {
             instances,
-            image_paths,
+            image_dir,
+            instances_file,
         };
 
         Ok(dataset)
@@ -46,10 +42,10 @@ impl DataSet {
         };
 
         let dir = dir.as_ref();
+        let image_dir = dir.join(name);
+        let annotation_dir = dir.join("annotations");
 
-        let instances_file = dir
-            .join("annotations")
-            .join(format!("instances_{}.json", name));
+        let instances_file = annotation_dir.join(format!("instances_{}.json", name));
         let instances: Instances = {
             let mut reader = BufReader::new(File::open(&instances_file).await?);
             let mut text = String::new();
@@ -57,15 +53,10 @@ impl DataSet {
             async_std::task::spawn_blocking(move || serde_json::from_str(&text)).await?
         };
 
-        let image_paths = instances
-            .images
-            .iter()
-            .map(|image| dir.join(name).join(&image.file_name))
-            .collect::<Vec<_>>();
-
         let dataset = Self {
             instances,
-            image_paths,
+            image_dir,
+            instances_file,
         };
 
         Ok(dataset)
