@@ -1,38 +1,21 @@
 use anyhow::Result;
+use clap::Parser;
+use coco::DataSet;
+use std::path::PathBuf;
 
-#[cfg(feature = "async")]
-mod example {
-    use anyhow::Result;
-    use argh::FromArgs;
-    use coco::DataSet;
-    use std::path::PathBuf;
-
-    #[derive(Debug, Clone, FromArgs)]
-    /// COCO data set inspector
-    struct Args {
-        #[argh(positional)]
-        /// data set directory
-        pub dataset_dir: PathBuf,
-        #[argh(positional)]
-        /// data set name
-        pub name: String,
-    }
-
-    pub async fn main() -> Result<()> {
-        let Args { dataset_dir, name } = argh::from_env();
-        let dataset = DataSet::load_async(&dataset_dir, &name).await?;
-        println!("{} images found", dataset.instances.images.len());
-        Ok(())
-    }
+#[derive(Debug, Clone, Parser)]
+/// COCO data set inspector
+struct Opts {
+    /// data set directory
+    pub dataset_dir: PathBuf,
+    /// data set name
+    pub name: String,
 }
 
-#[cfg(feature = "async")]
 #[async_std::main]
-async fn main() -> Result<()> {
-    example::main().await
-}
-
-#[cfg(not(feature = "async"))]
-fn main() {
-    panic!(r#"please enable "async" feature to run this example"#);
+pub async fn main() -> Result<()> {
+    let Opts { dataset_dir, name } = Opts::parse();
+    let dataset = DataSet::load_async(&dataset_dir, &name).await?;
+    println!("{} images found", dataset.instances.images.len());
+    Ok(())
 }

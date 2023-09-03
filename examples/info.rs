@@ -1,22 +1,20 @@
 use anyhow::Result;
-use argh::FromArgs;
+use clap::Parser;
 use coco::DataSet;
 use std::path::PathBuf;
 
-#[derive(Debug, Clone, FromArgs)]
+#[derive(Debug, Clone, Parser)]
 /// COCO data set inspector
-struct Args {
-    #[argh(positional)]
+struct Opts {
     /// data set directory
     pub dataset_dir: PathBuf,
-    #[argh(positional)]
     /// data set name
     pub name: String,
 }
 
 fn main() -> Result<()> {
-    let Args { dataset_dir, name } = argh::from_env();
-    let dataset = DataSet::load(&dataset_dir, &name)?;
+    let Opts { dataset_dir, name } = Opts::parse();
+    let dataset = DataSet::load(dataset_dir, &name)?;
     println!("{} images found", dataset.instances.images.len());
     Ok(())
 }
